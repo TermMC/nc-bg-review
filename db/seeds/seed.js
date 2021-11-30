@@ -6,6 +6,7 @@ const seed = (data) => {
 
   return (
     db
+      //drop tables
       .query("DROP TABLE IF EXISTS comments")
       .then(() => {
         return db.query("DROP TABLE IF EXISTS reviews");
@@ -16,12 +17,14 @@ const seed = (data) => {
       .then(() => {
         return db.query("DROP TABLE IF EXISTS categories").then(() => {});
       })
+      //create table categories
       .then(() => {
         return db.query(`CREATE TABLE categories (
         slug VARCHAR(100) PRIMARY KEY,
         description VARCHAR(300)
       ) `);
       })
+      //create table users
       .then(() => {
         return db.query(`CREATE TABLE users (
         username VARCHAR(200) PRIMARY KEY,
@@ -29,6 +32,7 @@ const seed = (data) => {
         name VARCHAR(250)
       )`);
       })
+      //create table reviews
       .then(() => {
         return db.query(`CREATE TABLE reviews (
         review_id SERIAL PRIMARY KEY,
@@ -42,6 +46,7 @@ const seed = (data) => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`);
       })
+      //create table comments
       .then(() => {
         return db.query(`CREATE TABLE comments (
         comment_id SERIAL PRIMARY KEY,
@@ -52,6 +57,7 @@ const seed = (data) => {
         body TEXT
       )`);
       })
+      //insert categories
       .then(() => {
         const formattedCategoryData = categoryData.map((category) => {
           return [category.slug, category.description];
@@ -62,6 +68,7 @@ const seed = (data) => {
         );
         return db.query(categoryDataInsertionString);
       })
+      //insert users
       .then(() => {
         const formattedUserData = userData.map((user) => {
           return [user.username, user.avatar_url, user.name];
@@ -72,6 +79,7 @@ const seed = (data) => {
         );
         return db.query(userDataInsertionString);
       })
+      //insert reviews
       .then(() => {
         const formattedReviewData = reviewData.map((review) => {
           return [
@@ -91,9 +99,7 @@ const seed = (data) => {
         );
         return db.query(reviewDataInsertionString);
       })
-
-      //insert into reviews
-      //insert into comments
+      //insert comments
       .then(() => {
         const formattedCommentData = commentData.map((comment) => {
           return [

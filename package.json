@@ -6,7 +6,7 @@
   "scripts": {
     "setup-dbs": "psql -f ./db/setup.sql",
     "seed": "PGPASSWORD=psqlpassword node ./db/seeds/run-seed.js",
-    "test": "jest"
+    "test": "PGPASSWORD=psqlpassword jest"
   },
   "repository": {
     "type": "git",
@@ -20,7 +20,8 @@
   },
   "homepage": "https://github.com/northcoders/be-nc-games#readme",
   "devDependencies": {
-    "jest": "^27.3.1"
+    "jest": "^27.3.1",
+    "supertest": "^6.1.6"
   },
   "dependencies": {
     "dotenv": "^10.0.0",
