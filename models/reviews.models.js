@@ -1,4 +1,5 @@
 const db = require("../db/connection");
+const format = require("pg-format");
 
 exports.fetchReview = (review_id) => {
   return db
@@ -38,27 +39,42 @@ exports.updateReview = (review_id, update_content) => {
   }
 };
 
-exports.fetchReviews = (category) => {
-  console.log("category", category);
-  if (false) {
-    //category && typeof category !== "string") {
+exports.fetchReviews = (category, sort_by = `created_at`, order = `desc`) => {
+  let queryString;
+  if (
+    ![
+      "owner",
+      "title",
+      "review_id",
+      "review_body",
+      "designer",
+      "review_img_url",
+      "category",
+      "created_at",
+      "votes",
+      "comment_count",
+    ].includes(sort_by) ||
+    !["asc", "desc"].includes(order.toLowerCase())
+  ) {
     return Promise.reject({ status: 400, msg: "Invalid Request" });
   } else {
-    return db
-      .query(
-        `SELECT reviews.*,COUNT(comments.review_id) as comment_count FROM comments RIGHT JOIN reviews ON reviews.review_id=comments.review_id WHERE category = $1 GROUP BY reviews.review_id `,
+    if (category) {
+      queryString = format(
+        `SELECT reviews.* ,COUNT(comments.review_id) as comment_count FROM comments RIGHT JOIN reviews ON reviews.review_id=comments.review_id WHERE category = %L GROUP BY reviews.review_id ORDER BY ${sort_by} ${order}`,
         [category]
-      )
-      .then((response) => {
-        if (false) {
-          //response.rows.length === 0) {
-          return Promise.reject({
-            status: 404,
-            msg: "No reviews of that category",
-          });
-        } else {
-          return review.rows;
-        }
-      });
+      );
+    } else {
+      queryString = `SELECT reviews.*,COUNT(comments.review_id) as comment_count FROM comments RIGHT JOIN reviews ON reviews.review_id=comments.review_id  GROUP BY reviews.review_id ORDER BY ${sort_by} ${order}`;
+    }
+    return db.query(queryString).then((response) => {
+      if (response.rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          msg: "No reviews of that category",
+        });
+      } else {
+        return response.rows;
+      }
+    });
   }
 };

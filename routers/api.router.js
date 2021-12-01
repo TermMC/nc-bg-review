@@ -6,7 +6,7 @@ const reviewsRouter = require("./reviews.router");
 const apiRouter = express.Router();
 
 apiRouter.use("/categories", categoriesRouter);
-apiRouter.use("/comments", commentsRouter);
 apiRouter.use("/reviews", reviewsRouter);
+apiRouter.use("/comments", commentsRouter);
 
 module.exports = apiRouter;

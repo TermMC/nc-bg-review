@@ -4,9 +4,11 @@ const {
   patchReview,
   getReviews,
 } = require("../controllers/reviews.controller");
-const reviews = require("../db/data/test-data/reviews");
+const commentsRouter = require("./comments.router");
 
 const reviewsRouter = express.Router();
+
+reviewsRouter.use("/:review_id/comments", commentsRouter);
 
 reviewsRouter.route("/:review_id").get(getReview).patch(patchReview);
 

@@ -145,12 +145,13 @@ describe("PATCH /api/reviews/:review_id", () => {
 });
 
 describe("GET /api/reviews?query", () => {
-  test("200 responds with an array of reviews when no query provided", () => {
+  test("200 responds with an array of all reviews when no query provided", () => {
     return request(app)
       .get("/api/reviews")
       .expect(200)
       .then((response) => {
         expect(response.body.reviews).toBeInstanceOf(Array);
+        expect(response.body.reviews.length).toBe(13);
         response.body.reviews.forEach((review) => {
           return expect(review).toEqual(
             expect.objectContaining({
@@ -201,12 +202,76 @@ describe("GET /api/reviews?query", () => {
         expect(response.body.msg).toBe("No reviews of that category");
       });
   });
-  test("400 responds with bad request msg when non-string category provided", () => {
+  test("200 responds with array correctly sorted when sorted by date in desc order by default", () => {
     return request(app)
-      .get("/api/reviews?category=12345")
+      .get("/api/reviews")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.reviews).toBeSortedBy("created_at", {
+          descending: true,
+        });
+      });
+  });
+  test("200 responds with array correctly sorted in desc order when given sort query ", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=designer")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.reviews).toBeSortedBy("designer", {
+          descending: true,
+        });
+      });
+  });
+  test("400 responds with bad request msg when given incorrect sort term", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=propaganda")
       .expect(400)
       .then((response) => {
         expect(response.body.msg).toBe("Invalid Request");
       });
   });
+  test("200 responds with array sorted in asc order when given order query", () => {
+    return request(app)
+      .get("/api/reviews?order=asc")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.reviews).toBeSortedBy("created_at", {
+          descending: false,
+        });
+      });
+  });
+  test("400 responds with bad request msg when given incorrect order term", () => {
+    return request(app)
+      .get("/api/reviews?order=the_phoenix")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid Request");
+      });
+  });
+});
+
+describe("GET /api/reviews/:review_id/comments", () => {
+  test("200 returns array of comments for given review id", () => {
+    return request(app)
+      .get("/api/reviews/2/comments")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.comments).toBeInstanceOf(Array);
+        expect(response.body.comments.length).toBe(3);
+        response.body.comments.forEach((comment) => {
+          return expect(comment).toEqual(
+            expect.objectContaining({
+              comment_id: expect.any(Number),
+              body: expect.any(String),
+              votes: expect.any(Number),
+              author: expect.any(String),
+              review_id: 2,
+              created_at: expect.any(String),
+            })
+          );
+        });
+      });
+  });
+  test("400", () => {});
+  test("", () => {});
 });

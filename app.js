@@ -4,9 +4,11 @@ const {
   handleCustomErrors,
   handle500Error,
 } = require("./error_handlers/error");
+
 const apiRouter = require("./routers/api.router");
 
 const app = express();
+
 app.use(express.json());
 
 app.use("/api", apiRouter);
