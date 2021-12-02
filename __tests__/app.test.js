@@ -420,3 +420,41 @@ describe("GET /api", () => {
       });
   });
 });
+
+describe("GET /api/users", () => {
+  test("200 responds with an array of user objects", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.users).toBeInstanceOf(Array);
+        expect(response.body.users.length).toBe(4);
+        response.body.users.forEach((user) =>
+          expect(user).toEqual(
+            expect.objectContaining({
+              username: expect.any(String),
+              name: expect.any(String),
+              avatar_url: expect.any(String),
+            })
+          )
+        );
+      });
+  });
+});
+
+describe("GET /api/users/:username", () => {
+  test("200 responds with correct user object", () => {
+    return request(app)
+      .get("/api/users/dav3rid")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.user).toEqual({
+          username: "dav3rid",
+          name: "dave",
+          avatar_url:
+            "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+        });
+      });
+  });
+  test("404 not found");
+});
