@@ -66,7 +66,22 @@ exports.asyncCreateComment = async (review_id, body, author) => {
 };
 
 exports.removeComment = (comment_id) => {
-  return db.query(`DELETE FROM comments WHERE comment_id=$1`, [comment_id]);
+  const commentExists = db.query(
+    `SELECT * FROM comments where comment_id = $1`,
+    [comment_id]
+  );
+  const deleteTheComment = db.query(
+    `DELETE FROM comments WHERE comment_id=$1`,
+    [comment_id]
+  );
+
+  return Promise.all([commentExists, deleteTheComment]).then((response) => {
+    if (response[0].rows.length === 0) {
+      return Promise.reject({ status: 404, msg: "Comment Not Found" });
+    } else {
+      return response[0].rows;
+    }
+  });
 };
 
 exports.asyncRemoveComment = async (comment_id) => {
@@ -90,7 +105,7 @@ exports.asyncRemoveComment = async (comment_id) => {
     if (!Number(review_id)) {
       return Promise.reject({ status: 400, msg: "Invalid Request" });
     } else {
-      return Promise.reject({ status: 404, msg: "Comment Not Found" });
+      return Promise.reject({ status: 404, msg: "Comment NotF ound" });
     }
   }
 };

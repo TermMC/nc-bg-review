@@ -358,7 +358,6 @@ describe("POST /api/reviews/:review_id/comments", () => {
 describe("DELETE /api/comments/:comment_id", () => {
   test("204 responds with no content", () => {
     return request(app).delete("/api/comments/1").expect(204);
-    // .then((some) => something);
   });
 
   test("404 not found responds with comment not found for id out of range", () => {
@@ -373,4 +372,8 @@ describe("DELETE /api/comments/:comment_id", () => {
       .expect(400)
       .then((response) => expect(response.body.msg).toBe("Invalid Request"));
   });
+});
+
+describe("GET /api", () => {
+  test("200 responds with all available endpoint on API", () => {});
 });
