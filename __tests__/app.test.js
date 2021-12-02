@@ -124,7 +124,7 @@ describe("PATCH /api/reviews/:review_id", () => {
         expect(response.body.msg).toBe("Invalid Request");
       });
   });
-  test("400 returns bad request msg for wrong data type sent to update ", () => {
+  test("400 returns bad request msg for wrong data type sent to update on correct key", () => {
     return request(app)
       .patch("/api/reviews/1")
       .send({ inc_votes: "beef wellington" })
@@ -272,6 +272,105 @@ describe("GET /api/reviews/:review_id/comments", () => {
         });
       });
   });
-  test("400", () => {});
-  test("", () => {});
+  test("400 bad request for review_id NaN", () => {
+    return request(app)
+      .get("/api/reviews/thirsty_witch/comments")
+      .expect(400)
+      .then((response) =>
+        expect(response.body.msg).toBe("Invalid Search Term")
+      );
+  });
+  test("404 not found for review_id not in range", () => {
+    return request(app)
+      .get("/api/reviews/9999999/comments")
+      .expect(404)
+      .then((response) => expect(response.body.msg).toBe("Review not found"));
+  });
+});
+
+describe("POST /api/reviews/:review_id/comments", () => {
+  test("201 responds with created comment object", () => {
+    return request(app)
+      .post("/api/reviews/1/comments")
+      .send({ username: "dav3rid", body: "It's like BEPIS in my body" })
+      .expect(201)
+      .then((response) => {
+        expect(response.body.comment).toEqual({
+          author: "dav3rid",
+          body: "It's like BEPIS in my body",
+          comment_id: 7,
+          created_at: expect.any(String),
+          review_id: 1,
+          votes: 0,
+        });
+      });
+  });
+  test("404 not found for review_id out of range", () => {
+    return request(app)
+      .post("/api/reviews/999999/comments")
+      .send({ username: "dav3rid", body: "It's like BEPIS in my body" })
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Review Not Found");
+      });
+  });
+  test("400 bad request for review_id NaN", () => {
+    return request(app)
+      .post("/api/reviews/beanan/comments")
+      .send({ username: "dav3rid", body: "It's like BEPIS in my body" })
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid Data Provided");
+      });
+  });
+  test("400 bad request for not having correct keys on object", () => {
+    return request(app)
+      .post("/api/reviews/1/comments")
+      .send({ author: "dav3rid", body: "It's like BEPIS in my body" })
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid Data Provided");
+      });
+  });
+  test("201 for comment object with additional keys, additional keys are ignored  ", () => {
+    return request(app)
+      .post("/api/reviews/1/comments")
+      .send({
+        created_at: 356247,
+        username: "dav3rid",
+        body: "It's like BEPIS in my body",
+        second_extra_key: "nonsense",
+      })
+      .expect(201)
+      .then((response) => {
+        expect(response.body.comment).toEqual({
+          author: "dav3rid",
+          body: "It's like BEPIS in my body",
+          comment_id: 7,
+          created_at: expect.any(String),
+          review_id: 1,
+          votes: 0,
+        });
+      });
+  });
+});
+
+describe("DELETE /api/comments/:comment_id", () => {
+  test("204 responds with no content", () => {
+    return request(app).delete("/api/comments/1").expect(204);
+    // .then((some) => something);
+  });
+
+  test("404 not found responds with comment not found for id out of range", () => {
+    return request(app)
+      .delete("/api/comments/9999")
+      .expect(404)
+      .then((response) => expect(response.body.msg).toBe("Comment Not Found"));
+  });
+  test("400 bad request for id wrong data type", () => {
+    return request(app)
+      .delete("/api/comments/omelette")
+      .expect(400)
+      .then((response) => expect(response.body.msg).toBe("Invalid Request"));
+  });
 });

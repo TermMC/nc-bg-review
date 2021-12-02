@@ -1,6 +1,9 @@
-exports.handle400BadRequest = (err, req, res, next) => {
+exports.handleSQLerrors = (err, req, res, next) => {
   if (err.code === "22P02") {
     res.status(400).send({ msg: "Invalid Request" });
+    //remember this has an OR
+  } else if (err.code === "42703" || "23503") {
+    res.status(400).send({ msg: "Invalid Search Term" });
   } else {
     next(err);
   }
