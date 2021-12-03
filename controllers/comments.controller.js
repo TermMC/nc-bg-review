@@ -3,6 +3,7 @@ const {
   asyncCreateComment,
   removeComment,
   asyncRemoveComment,
+  updateComment,
 } = require("../models/comments.models");
 
 exports.getComments = (req, res, next) => {
@@ -37,4 +38,12 @@ exports.deleteComment = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
+};
+
+exports.patchComment = (req, res, next) => {
+  const update = req.body;
+  const { comment_id } = req.params;
+  updateComment(comment_id, update)
+    .then((comment) => res.status(200).send({ comment }))
+    .catch((err) => next(err));
 };

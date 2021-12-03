@@ -26,7 +26,7 @@ exports.createComment = (review_id, body, author) => {
       console.log("I'm now in the model if block");
       return db
         .query(
-          `INSERT INTO comments (review_id, body,author) VALUES ($1,$2,$3) RETURNING *`,
+          `INSERT INTO comments (review_id, body, author) VALUES ($1,$2,$3) RETURNING *`,
           [review_id, body, author]
         )
         .then((response) => {
@@ -107,5 +107,29 @@ exports.asyncRemoveComment = async (comment_id) => {
     } else {
       return Promise.reject({ status: 404, msg: "Comment NotF ound" });
     }
+  }
+};
+
+exports.updateComment = (comment_id, update) => {
+  const votes_inc = update.inc_votes;
+  if (typeof votes_inc !== "number") {
+    return Promise.reject({ status: 400, msg: "Invalid Update Provided" });
+  } else {
+    const commentExists = db.query(
+      `SELECT * FROM comments where comment_id = $1`,
+      [comment_id]
+    );
+    const commentUpdate = db.query(
+      `UPDATE comments SET votes =( (SELECT votes FROM comments WHERE comment_id = $1 ) + $2 ) WHERE comment_id=  $1 RETURNING *`,
+      [comment_id, votes_inc]
+    );
+
+    return Promise.all([commentExists, commentUpdate]).then((responses) => {
+      if (responses[0].rows.length !== 0) {
+        return responses[1].rows[0];
+      } else {
+        return Promise.reject({ status: 404, msg: "Comment Not Found" });
+      }
+    });
   }
 };

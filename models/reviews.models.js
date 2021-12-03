@@ -26,7 +26,7 @@ exports.updateReview = (review_id, update_content) => {
   } else {
     return db
       .query(
-        `UPDATE reviews SET votes = ((SELECT votes FROM reviews WHERE review_id = $1)+$2)WHERE review_id = $1 RETURNING *`,
+        `UPDATE reviews SET votes = ( (SELECT votes FROM reviews WHERE review_id = $1 ) + $2 ) WHERE review_id = $1 RETURNING *`,
         [review_id, votes_inc]
       )
       .then((result) => {
@@ -76,5 +76,25 @@ exports.fetchReviews = (category, sort_by = `created_at`, order = `desc`) => {
         return response.rows;
       }
     });
+  }
+};
+
+exports.createReview = (review_data) => {
+  const { owner, title, review_body, designer, category } = review_data;
+  const update_list = [owner, title, review_body, designer, category];
+  console.log(update_list);
+  if (update_list.includes(undefined)) {
+    console.log("The list included undefined");
+    return Promise.reject({ status: 400, msg: "Invalid Update Provided" });
+  } else {
+    return db
+      .query(
+        `INSERT INTO reviews (owner, title, review_body, designer, category) VALUES ($1 , $2 , $3 , $4 , $5) RETURNING *`,
+        update_list
+      )
+      .then((response) => {
+        console.log(response.rows);
+        return { ...response.rows[0], comment_count: 0 };
+      });
   }
 };

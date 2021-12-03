@@ -145,13 +145,14 @@ describe("PATCH /api/reviews/:review_id", () => {
 });
 
 describe("GET /api/reviews?query", () => {
-  test("200 responds with an array of all reviews when no query provided", () => {
+  test("200 responds with an array of first 10 reviews when no query provided", () => {
     return request(app)
       .get("/api/reviews")
       .expect(200)
       .then((response) => {
         expect(response.body.reviews).toBeInstanceOf(Array);
         expect(response.body.reviews.length).toBe(13);
+        //expect(response.body.total_count).toBe(13);
         response.body.reviews.forEach((review) => {
           return expect(review).toEqual(
             expect.objectContaining({
@@ -366,6 +367,7 @@ describe("DELETE /api/comments/:comment_id", () => {
       .expect(404)
       .then((response) => expect(response.body.msg).toBe("Comment Not Found"));
   });
+
   test("400 bad request for id wrong data type", () => {
     return request(app)
       .delete("/api/comments/omelette")
@@ -456,5 +458,158 @@ describe("GET /api/users/:username", () => {
         });
       });
   });
-  test("404 not found");
+  test("404 not found for user not in db", () => {
+    return request(app)
+      .get("/api/users/123456")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("User Could Not Be Found");
+      });
+  });
+});
+
+describe("PATCH /api/comments/:comment_id", () => {
+  test("200 responds with the updated comment", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({ inc_votes: 1 })
+      .expect(200)
+      .then((response) => {
+        expect(response.body.comment).toEqual(
+          expect.objectContaining({
+            comment_id: 1,
+            body: "I loved this game too!",
+            votes: 17,
+            author: "bainesface",
+            review_id: 2,
+            created_at: expect.any(String),
+          })
+        );
+      });
+  });
+
+  test("404 not found responds with comment not found for id out of range", () => {
+    return request(app)
+      .patch("/api/comments/99999")
+      .send({ inc_votes: 1 })
+      .expect(404)
+      .then((response) => expect(response.body.msg).toBe("Comment Not Found"));
+  });
+
+  test("400 bad request for id wrong data type", () => {
+    return request(app)
+      .patch("/api/comments/bantam")
+      .send({ inc_votes: 1 })
+      .expect(400)
+      .then((response) => expect(response.body.msg).toBe("Invalid Request"));
+  });
+
+  test("400 returns bad request msg for wrong data type sent to update on correct key", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({ inc_votes: "beef wellington" })
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid Update Provided");
+      });
+  });
+
+  test("400 returns bad request msg for wrong data type sent to update ", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send("beef wellington")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid Update Provided");
+      });
+  });
+});
+
+describe("POST /api/reviews", () => {
+  test("201 responds with the newly added review", () => {
+    return request(app)
+      .post("/api/reviews")
+      .send({
+        owner: "mallionaire",
+        title: "Century: The Spiciest Road You Can Walk Down",
+        review_body:
+          "How did you get all this spice? Why is it so cubular? How will you get rid of it? Why don't you have more of those dam upgrade cards?",
+        designer: "Josh Homme",
+        category: "euro game",
+      })
+      .expect(201)
+      .then((response) => {
+        expect(response.body.review).toEqual(
+          expect.objectContaining({
+            owner: "mallionaire",
+            title: "Century: The Spiciest Road You Can Walk Down",
+            review_body:
+              "How did you get all this spice? Why is it so cubular? How will you get rid of it? Why don't you have more of those dam upgrade cards?",
+            designer: "Josh Homme",
+            category: "euro game",
+            review_id: expect.any(Number),
+            review_img_url: expect.any(String),
+            votes: 0,
+            comment_count: 0,
+            created_at: expect.any(String),
+          })
+        );
+      });
+  });
+  test("400 bad request for object with keys missing", () => {
+    return request(app)
+      .post("/api/reviews")
+      .send({
+        owner: "mallionaire",
+        babaganoosh: "Century: The Spiciest Road You Can Walk Down",
+        review_body:
+          "How did you get all this spice? Why is it so cubular? How will you get rid of it? Why don't you have more of those dam upgrade cards?",
+        designer: "Josh Homme",
+        category: "euro game",
+      })
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid Update Provided");
+      });
+  });
+  test("201 for comment object with additional keys, additional keys are ignored  ", () => {
+    return request(app)
+      .post("/api/reviews")
+      .send({
+        owner: "mallionaire",
+        title: "Century: The Spiciest Road You Can Walk Down",
+        review_body:
+          "How did you get all this spice? Why is it so cubular? How will you get rid of it? Why don't you have more of those dam upgrade cards?",
+        designer: "Josh Homme",
+        category: "euro game",
+        extra_key: "Toads are for everyone.",
+      })
+      .expect(201)
+      .then((response) => {
+        expect(response.body.review).toEqual(
+          expect.objectContaining({
+            owner: "mallionaire",
+            title: "Century: The Spiciest Road You Can Walk Down",
+            review_body:
+              "How did you get all this spice? Why is it so cubular? How will you get rid of it? Why don't you have more of those dam upgrade cards?",
+            designer: "Josh Homme",
+            category: "euro game",
+            review_id: expect.any(Number),
+            review_img_url: expect.any(String),
+            votes: 0,
+            comment_count: 0,
+            created_at: expect.any(String),
+          })
+        );
+      });
+  });
+  test("400 bad request for non-object update provided", () => {
+    return request(app)
+      .post("/api/reviews")
+      .send("I'm the wrong data type, I'm not even an object")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid Update Provided");
+      });
+  });
 });
