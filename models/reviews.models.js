@@ -82,9 +82,7 @@ exports.fetchReviews = (category, sort_by = `created_at`, order = `desc`) => {
 exports.createReview = (review_data) => {
   const { owner, title, review_body, designer, category } = review_data;
   const update_list = [owner, title, review_body, designer, category];
-  console.log(update_list);
   if (update_list.includes(undefined)) {
-    console.log("The list included undefined");
     return Promise.reject({ status: 400, msg: "Invalid Update Provided" });
   } else {
     return db
@@ -93,7 +91,6 @@ exports.createReview = (review_data) => {
         update_list
       )
       .then((response) => {
-        console.log(response.rows);
         return { ...response.rows[0], comment_count: 0 };
       });
   }

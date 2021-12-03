@@ -32,7 +32,6 @@ exports.getReviews = (req, res, next) => {
   const { category, sort_by, order } = req.query;
   fetchReviews(category, sort_by, order)
     .then((reviews) => {
-      console.log(reviews);
       res.status(200).send({ reviews });
     })
     .catch((err) => {
@@ -47,7 +46,6 @@ exports.postReview = (req, res, next) => {
       res.status(201).send({ review });
     })
     .catch((err) => {
-      console.log(err);
       next(err);
     });
 };
