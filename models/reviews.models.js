@@ -29,20 +29,27 @@ exports.fetchReview = (review_id) => {
 };
 
 exports.updateReview = (review_id, update_content) => {
-  const votes_inc = update_content.inc_votes;
+  let votes_inc;
+
+  update_content.inc_votes
+    ? (votes_inc = update_content.inc_votes)
+    : (votes_inc = 0);
+
   if (typeof votes_inc !== "number") {
     return Promise.reject({ status: 400, msg: "Invalid Update Provided" });
   } else {
     return db
       .query(
         `UPDATE reviews 
-        SET votes = ( (
+        SET votes = ( 
+          (
           SELECT votes 
           FROM reviews 
-          WHERE review_id = $1 ) 
-            + $2 ) 
-        WHERE review_id = $1 
-        RETURNING *`,
+          WHERE review_id = $1 
+          ) 
+          + $2 ) 
+          WHERE review_id = $1 
+          RETURNING *`,
         [review_id, votes_inc]
       )
       .then((result) => {
@@ -99,14 +106,7 @@ exports.fetchReviews = (category, sort_by = `created_at`, order = `desc`) => {
       ORDER BY ${sort_by} ${order}`;
     }
     return db.query(queryString).then((response) => {
-      // if (response.rows.length === 0) {
-      //   return Promise.reject({
-      //     status: 404,
-      //     msg: "No reviews of that category",
-      //   });
-      // } else {
       return response.rows;
-      // }
     });
   }
 };

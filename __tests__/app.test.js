@@ -107,6 +107,26 @@ describe("PATCH /api/reviews/:review_id", () => {
         });
       });
   });
+  test("200 responds with unchanged review for missing inc_votes key", () => {
+    return request(app)
+      .patch("/api/reviews/2")
+      .send({})
+      .expect(200)
+      .expect((response) => {
+        expect(response.body.review).toEqual({
+          review_id: 2,
+          title: "Jenga",
+          designer: "Leslie Scott",
+          owner: "philippaclaire9",
+          review_img_url:
+            "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+          review_body: "Fiddly fun for all the family",
+          category: "dexterity",
+          created_at: expect.any(String),
+          votes: 5,
+        });
+      });
+  });
   test("404 returns bad request msg for id out of range", () => {
     return request(app)
       .patch("/api/reviews/999999")
@@ -129,15 +149,6 @@ describe("PATCH /api/reviews/:review_id", () => {
     return request(app)
       .patch("/api/reviews/1")
       .send({ inc_votes: "beef wellington" })
-      .expect(400)
-      .then((response) => {
-        expect(response.body.msg).toBe("Invalid Update Provided");
-      });
-  });
-  test("400 returns bad request msg for wrong data type sent to update ", () => {
-    return request(app)
-      .patch("/api/reviews/1")
-      .send("beef wellington")
       .expect(400)
       .then((response) => {
         expect(response.body.msg).toBe("Invalid Update Provided");
@@ -285,10 +296,17 @@ describe("GET /api/reviews/:review_id/comments", () => {
       );
   });
   test("404 not found for review_id not in range", () => {
+    return request(app).get("/api/reviews/9999999/comments").expect(404);
+    // .then((response) => expect(response.body.msg).toBe("Review not found"));
+  });
+  test("200 returns empty array for review with no comments", () => {
     return request(app)
-      .get("/api/reviews/9999999/comments")
-      .expect(404)
-      .then((response) => expect(response.body.msg).toBe("Review not found"));
+      .get("/api/reviews/1/comments")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toHaveLength(0);
+        expect(response.body.comments).toBeInstanceOf(Array);
+      });
   });
 });
 
@@ -334,6 +352,18 @@ describe("POST /api/reviews/:review_id/comments", () => {
       .expect(400)
       .then((response) => {
         expect(response.body.msg).toBe("Invalid Data Provided");
+      });
+  });
+  test("404 for username does not exist", () => {
+    return request(app)
+      .post("/api/reviews/1/comments")
+      .send({
+        username: "Not_a_Real_Username",
+        body: "It's like BEPIS in my body",
+      })
+      .expect(404)
+      .then((res) => {
+        expect(res.body.msg).toBe("User does not exist");
       });
   });
   test("201 for comment object with additional keys, additional keys are ignored  ", () => {
@@ -517,13 +547,22 @@ describe("PATCH /api/comments/:comment_id", () => {
       });
   });
 
-  test("400 returns bad request msg for wrong data type sent to update ", () => {
+  test("200 missing inc_votes key makes no change to comment", () => {
     return request(app)
       .patch("/api/comments/1")
       .send("beef wellington")
-      .expect(400)
+      .expect(200)
       .then((response) => {
-        expect(response.body.msg).toBe("Invalid Update Provided");
+        expect(response.body.comment).toEqual(
+          expect.objectContaining({
+            comment_id: 1,
+            body: "I loved this game too!",
+            votes: 16,
+            author: "bainesface",
+            review_id: 2,
+            created_at: expect.any(String),
+          })
+        );
       });
   });
 });

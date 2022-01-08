@@ -1,9 +1,18 @@
 exports.handleSQLerrors = (err, req, res, next) => {
-  if (err.code === "22P02") {
-    res.status(400).send({ msg: "Invalid Request" });
-    //remember this has an OR
-  } else if (err.code === "42703" || "23503") {
-    res.status(400).send({ msg: "Invalid Search Term" });
+  let status, msg;
+  switch (err.code) {
+    case "22P02":
+      status = 400;
+      msg = "Invalid Request";
+      break;
+    case "42703":
+    case "23503":
+      status = 400;
+      msg = "Invalid Search Term";
+      break;
+  }
+  if (msg && status) {
+    res.status(status).send({ msg });
   } else {
     next(err);
   }
