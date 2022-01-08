@@ -4,12 +4,21 @@ const format = require("pg-format");
 exports.fetchReview = (review_id) => {
   return db
     .query(
-      `SELECT reviews.*,COUNT(comments.review_id) as comment_count FROM comments RIGHT JOIN reviews ON reviews.review_id=comments.review_id WHERE reviews.review_id = $1 GROUP BY reviews.review_id`,
+      `SELECT reviews.*,
+      COUNT(comments.review_id) as comment_count 
+      FROM comments 
+      RIGHT JOIN reviews 
+      ON reviews.review_id=comments.review_id 
+      WHERE reviews.review_id = $1 
+      GROUP BY reviews.review_id`,
       [review_id]
     )
     .then((review) => {
       if (review.rows.length === 0) {
-        return Promise.reject({ status: 404, msg: "Invalid review ID" });
+        return Promise.reject({
+          status: 404,
+          msg: "Invalid review ID",
+        });
       } else {
         return review.rows[0];
       }
@@ -26,12 +35,22 @@ exports.updateReview = (review_id, update_content) => {
   } else {
     return db
       .query(
-        `UPDATE reviews SET votes = ( (SELECT votes FROM reviews WHERE review_id = $1 ) + $2 ) WHERE review_id = $1 RETURNING *`,
+        `UPDATE reviews 
+        SET votes = ( (
+          SELECT votes 
+          FROM reviews 
+          WHERE review_id = $1 ) 
+            + $2 ) 
+        WHERE review_id = $1 
+        RETURNING *`,
         [review_id, votes_inc]
       )
       .then((result) => {
         if (result.rows.length === 0) {
-          return Promise.reject({ status: 404, msg: "Invalid review ID" });
+          return Promise.reject({
+            status: 404,
+            msg: "Invalid review ID",
+          });
         } else {
           return result.rows[0];
         }
@@ -60,11 +79,24 @@ exports.fetchReviews = (category, sort_by = `created_at`, order = `desc`) => {
   } else {
     if (category) {
       queryString = format(
-        `SELECT reviews.* ,COUNT(comments.review_id) as comment_count FROM comments RIGHT JOIN reviews ON reviews.review_id=comments.review_id WHERE category = %L GROUP BY reviews.review_id ORDER BY ${sort_by} ${order}`,
+        `SELECT reviews.* ,
+        COUNT(comments.review_id) as comment_count 
+        FROM comments 
+        RIGHT JOIN reviews 
+        ON reviews.review_id=comments.review_id 
+        WHERE category = %L 
+        GROUP BY reviews.review_id 
+        ORDER BY ${sort_by} ${order}`,
         [category]
       );
     } else {
-      queryString = `SELECT reviews.*,COUNT(comments.review_id) as comment_count FROM comments RIGHT JOIN reviews ON reviews.review_id=comments.review_id  GROUP BY reviews.review_id ORDER BY ${sort_by} ${order}`;
+      queryString = `SELECT reviews.*,
+      COUNT(comments.review_id) as comment_count 
+      FROM comments 
+      RIGHT JOIN reviews 
+      ON reviews.review_id=comments.review_id  
+      GROUP BY reviews.review_id 
+      ORDER BY ${sort_by} ${order}`;
     }
     return db.query(queryString).then((response) => {
       if (response.rows.length === 0) {
@@ -83,11 +115,17 @@ exports.createReview = (review_data) => {
   const { owner, title, review_body, designer, category } = review_data;
   const update_list = [owner, title, review_body, designer, category];
   if (update_list.includes(undefined)) {
-    return Promise.reject({ status: 400, msg: "Invalid Update Provided" });
+    return Promise.reject({
+      status: 400,
+      msg: "Invalid Update Provided",
+    });
   } else {
     return db
       .query(
-        `INSERT INTO reviews (owner, title, review_body, designer, category) VALUES ($1 , $2 , $3 , $4 , $5) RETURNING *`,
+        `INSERT INTO reviews 
+        (owner, title, review_body, designer, category) 
+        VALUES ($1 , $2 , $3 , $4 , $5) 
+        RETURNING *`,
         update_list
       )
       .then((response) => {

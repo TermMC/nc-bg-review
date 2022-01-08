@@ -13,6 +13,7 @@ describe("GET /api/categories", () => {
       .get("/api/categories")
       .expect(200)
       .then((response) => {
+        expect(response.body.categories.length).not.toBe(0);
         response.body.categories.forEach((category) => {
           expect(category).toEqual(
             expect.objectContaining({
@@ -152,7 +153,7 @@ describe("GET /api/reviews?query", () => {
       .then((response) => {
         expect(response.body.reviews).toBeInstanceOf(Array);
         expect(response.body.reviews.length).toBe(13);
-        //expect(response.body.total_count).toBe(13);
+
         response.body.reviews.forEach((review) => {
           return expect(review).toEqual(
             expect.objectContaining({
@@ -177,6 +178,8 @@ describe("GET /api/reviews?query", () => {
       .expect(200)
       .then((response) => {
         expect(response.body.reviews).toBeInstanceOf(Array);
+
+        expect(response.body.reviews.length).not.toBe(0);
         response.body.reviews.forEach((review) => {
           return expect(review).toEqual(
             expect.objectContaining({

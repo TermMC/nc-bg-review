@@ -3,12 +3,19 @@ const { checkRecordExists } = require("./utils");
 
 exports.fetchComments = (review_id) => {
   return db
-    .query(`SELECT * FROM comments WHERE review_id = ${review_id}`)
+    .query(
+      `
+    SELECT * FROM comments 
+    WHERE review_id = ${review_id}`
+    )
     .then((response) => {
       if (response.rows.length !== 0) {
         return response.rows;
       } else {
-        return Promise.reject({ status: 404, msg: "Review not found" });
+        return Promise.reject({
+          status: 404,
+          msg: "Review not found",
+        });
       }
     });
 };
@@ -113,14 +120,25 @@ exports.asyncRemoveComment = async (comment_id) => {
 exports.updateComment = (comment_id, update) => {
   const votes_inc = update.inc_votes;
   if (typeof votes_inc !== "number") {
-    return Promise.reject({ status: 400, msg: "Invalid Update Provided" });
+    return Promise.reject({
+      status: 400,
+      msg: "Invalid Update Provided",
+    });
   } else {
     const commentExists = db.query(
-      `SELECT * FROM comments where comment_id = $1`,
+      `SELECT * FROM comments 
+      WHERE comment_id = $1`,
       [comment_id]
     );
     const commentUpdate = db.query(
-      `UPDATE comments SET votes =( (SELECT votes FROM comments WHERE comment_id = $1 ) + $2 ) WHERE comment_id=  $1 RETURNING *`,
+      `UPDATE comments 
+      SET votes =( 
+        (SELECT votes 
+          FROM comments 
+          WHERE comment_id = $1 )
+           + $2 ) 
+      WHERE comment_id = $1 
+      RETURNING *`,
       [comment_id, votes_inc]
     );
 
@@ -128,7 +146,10 @@ exports.updateComment = (comment_id, update) => {
       if (responses[0].rows.length !== 0) {
         return responses[1].rows[0];
       } else {
-        return Promise.reject({ status: 404, msg: "Comment Not Found" });
+        return Promise.reject({
+          status: 404,
+          msg: "Comment Not Found",
+        });
       }
     });
   }

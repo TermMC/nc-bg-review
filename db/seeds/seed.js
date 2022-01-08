@@ -29,20 +29,20 @@ const seed = (data) => {
         return db.query(`CREATE TABLE users (
         username VARCHAR(200) PRIMARY KEY,
         avatar_url TEXT,
-        name VARCHAR(250)
+        name VARCHAR(250) NOT NULL
       )`);
       })
       //create table reviews
       .then(() => {
         return db.query(`CREATE TABLE reviews (
         review_id SERIAL PRIMARY KEY,
-        title VARCHAR(500),
-        review_body TEXT,
+        title VARCHAR(500) NOT NULL,
+        review_body TEXT NOT NULL,
         designer VARCHAR(250),
         review_img_url TEXT DEFAULT 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg',
         votes INT DEFAULT 0,
-        category VARCHAR(100) REFERENCES categories(slug),
-        owner VARCHAR(200) REFERENCES users(username),
+        category VARCHAR(100) REFERENCES categories(slug) NOT NULL,
+        owner VARCHAR(200) REFERENCES users(username) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`);
       })
@@ -50,11 +50,11 @@ const seed = (data) => {
       .then(() => {
         return db.query(`CREATE TABLE comments (
         comment_id SERIAL PRIMARY KEY,
-        author VARCHAR(200) REFERENCES users(username),
-        review_id INT REFERENCES reviews(review_id),
+        author VARCHAR(200) REFERENCES users(username) NOT NULL,
+        review_id INT REFERENCES reviews(review_id) NOT NULL,
         votes INT DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        body TEXT
+        body TEXT NOT NULL
       )`);
       })
       //insert categories
