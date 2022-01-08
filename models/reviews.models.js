@@ -99,14 +99,14 @@ exports.fetchReviews = (category, sort_by = `created_at`, order = `desc`) => {
       ORDER BY ${sort_by} ${order}`;
     }
     return db.query(queryString).then((response) => {
-      if (response.rows.length === 0) {
-        return Promise.reject({
-          status: 404,
-          msg: "No reviews of that category",
-        });
-      } else {
-        return response.rows;
-      }
+      // if (response.rows.length === 0) {
+      //   return Promise.reject({
+      //     status: 404,
+      //     msg: "No reviews of that category",
+      //   });
+      // } else {
+      return response.rows;
+      // }
     });
   }
 };

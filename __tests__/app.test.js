@@ -198,12 +198,12 @@ describe("GET /api/reviews?query", () => {
         });
       });
   });
-  test("404 responds with bad request msg when invalid category string provided", () => {
+  test("200 responds with empty array when invalid category string provided", () => {
     return request(app)
       .get("/api/reviews?category=jibberish")
-      .expect(404)
+      .expect(200)
       .then((response) => {
-        expect(response.body.msg).toBe("No reviews of that category");
+        expect(response.body.reviews).toHaveLength(0);
       });
   });
   test("200 responds with array correctly sorted when sorted by date in desc order by default", () => {
