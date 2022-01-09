@@ -2,7 +2,6 @@ const {
   fetchComments,
   asyncCreateComment,
   removeComment,
-  asyncRemoveComment,
   updateComment,
 } = require("../models/comments.models");
 

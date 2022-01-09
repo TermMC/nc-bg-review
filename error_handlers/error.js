@@ -6,8 +6,11 @@ exports.handleSQLerrors = (err, req, res, next) => {
       msg = "Invalid Request";
       break;
     case "42703":
-    case "23503":
       status = 400;
+      msg = "Invalid Search Term";
+      break;
+    case "23503":
+      status = 404;
       msg = "Invalid Search Term";
       break;
   }

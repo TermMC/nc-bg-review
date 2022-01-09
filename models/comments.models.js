@@ -2,27 +2,21 @@ const db = require("../db/connection");
 const { checkRecordExists } = require("./utils");
 
 exports.fetchComments = (review_id) => {
-  return db
-    .query(
-      // , comment_id, author, comments.review_id, comments.votes, comments.created_at, body
-      `
-    SELECT category
-    FROM reviews 
-    JOIN comments 
-    ON reviews.review_id = comments.review_id 
-    WHERE reviews.review_id = ${review_id}`
-    )
-    .then((response) => {
-      console.log(response.rows);
-      // if (response.rows.length !== 0) {
-      return response.rows;
-      // } else {
-      //   return Promise.reject({
-      //     status: 404,
-      //     msg: "Review not found",
-      //   });
-      // }
-    });
+  const checkReviewExists = checkRecordExists("review", review_id);
+
+  const fetchTheComments = db.query(
+    `
+    SELECT *
+    FROM comments 
+    WHERE review_id = ${review_id}`
+  );
+  return Promise.all([checkReviewExists, fetchTheComments]).then((response) => {
+    if (response[0]) {
+      return response[1].rows;
+    } else {
+      return Promise.reject({ status: 404, msg: "Review not found" });
+    }
+  });
 };
 
 // exports.createComment = (review_id, body, author) => {
@@ -77,32 +71,6 @@ exports.removeComment = (comment_id) => {
     }
   });
 };
-
-// exports.asyncRemoveComment = async (comment_id) => {
-//   const commentExists = await checkRecordExists("comment", comment_id);
-
-//   if (commentExists) {
-//     const deletedComment = await db
-//       .query(`DELETE FROM comments WHERE comment_id=$1`, [comment_id])
-//       .then((result) => {
-//         return result;
-//       });
-
-//     const commentDeleted = !(await checkRecordExists("comment", comment_id));
-
-//     if (commentDeleted) {
-//       return deletedComment;
-//     } else {
-//       return Promise.reject({});
-//     }
-//   } else {
-//     if (!Number(review_id)) {
-//       return Promise.reject({ status: 400, msg: "Invalid Request" });
-//     } else {
-//       return Promise.reject({ status: 404, msg: "Comment NotF ound" });
-//     }
-//   }
-// };
 
 exports.updateComment = (comment_id, update) => {
   let votes_inc;

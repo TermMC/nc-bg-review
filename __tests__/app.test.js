@@ -209,9 +209,10 @@ describe("GET /api/reviews?query", () => {
         });
       });
   });
+  //need two tests here, one for children's games i.e. extant category with no reviews and one for gibberish i.e. non-existent category
   test("200 responds with empty array when invalid category string provided", () => {
     return request(app)
-      .get("/api/reviews?category=jibberish")
+      .get("/api/reviews?category=gibberish")
       .expect(200)
       .then((response) => {
         expect(response.body.reviews).toHaveLength(0);
@@ -304,8 +305,8 @@ describe("GET /api/reviews/:review_id/comments", () => {
       .get("/api/reviews/1/comments")
       .expect(200)
       .then((res) => {
-        expect(res.body.reviews).toHaveLength(0);
-        expect(response.body.comments).toBeInstanceOf(Array);
+        expect(res.body.comments).toHaveLength(0);
+        expect(res.body.comments).toBeInstanceOf(Array);
       });
   });
 });
@@ -333,7 +334,7 @@ describe("POST /api/reviews/:review_id/comments", () => {
       .send({ username: "dav3rid", body: "It's like BEPIS in my body" })
       .expect(404)
       .then((response) => {
-        expect(response.body.msg).toBe("Review Not Found");
+        expect(response.body.msg).toBe("Invalid Search Term");
       });
   });
   test("400 bad request for review_id NaN", () => {
@@ -342,7 +343,7 @@ describe("POST /api/reviews/:review_id/comments", () => {
       .send({ username: "dav3rid", body: "It's like BEPIS in my body" })
       .expect(400)
       .then((response) => {
-        expect(response.body.msg).toBe("Invalid Data Provided");
+        expect(response.body.msg).toBe("Invalid Request");
       });
   });
   test("400 bad request for not having correct keys on object", () => {
@@ -363,7 +364,7 @@ describe("POST /api/reviews/:review_id/comments", () => {
       })
       .expect(404)
       .then((res) => {
-        expect(res.body.msg).toBe("User does not exist");
+        expect(res.body.msg).toBe("Invalid Search Term");
       });
   });
   test("201 for comment object with additional keys, additional keys are ignored  ", () => {
@@ -396,7 +397,7 @@ describe("DELETE /api/comments/:comment_id", () => {
 
   test("404 not found responds with comment not found for id out of range", () => {
     return request(app)
-      .delete("/api/comments/9999")
+      .delete("/api/comments/99999999")
       .expect(404)
       .then((response) => expect(response.body.msg).toBe("Comment Not Found"));
   });
@@ -547,7 +548,7 @@ describe("PATCH /api/comments/:comment_id", () => {
       });
   });
 
-  test("200 missing inc_votes key makes no change to comment", () => {
+  test("200 missing inc_votes returns unchanged comment", () => {
     return request(app)
       .patch("/api/comments/1")
       .send("beef wellington")
