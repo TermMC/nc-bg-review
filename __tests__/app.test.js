@@ -209,13 +209,21 @@ describe("GET /api/reviews?query", () => {
         });
       });
   });
-  //need two tests here, one for children's games i.e. extant category with no reviews and one for gibberish i.e. non-existent category
-  test("200 responds with empty array when invalid category string provided", () => {
+
+  test("200 responds with empty array when category string provided for category with no reviews", () => {
     return request(app)
-      .get("/api/reviews?category=gibberish")
+      .get("/api/reviews?category=children's games")
       .expect(200)
       .then((response) => {
         expect(response.body.reviews).toHaveLength(0);
+      });
+  });
+  test("404 responds with bad request message when non-existent category provided", () => {
+    return request(app)
+      .get("/api/reviews?category=gibberish")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid Search Term");
       });
   });
   test("200 responds with array correctly sorted when sorted by date in desc order by default", () => {

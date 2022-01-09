@@ -1,3 +1,4 @@
+const { fetchCategories } = require("./categories.models");
 const db = require("../db/connection");
 const format = require("pg-format");
 
@@ -96,6 +97,17 @@ exports.fetchReviews = (category, sort_by = `created_at`, order = `desc`) => {
         ORDER BY ${sort_by} ${order}`,
         [category]
       );
+      const categoriesQuery = fetchCategories();
+      return Promise.all([categoriesQuery, db.query(queryString)]).then(
+        (res) => {
+          const categories = res[0].map((category) => category.slug);
+          if (categories.includes(category)) {
+            return res[1].rows;
+          } else {
+            return Promise.reject({ status: 404, msg: "Invalid Search Term" });
+          }
+        }
+      );
     } else {
       queryString = `SELECT reviews.*,
       COUNT(comments.review_id) as comment_count 
@@ -104,10 +116,11 @@ exports.fetchReviews = (category, sort_by = `created_at`, order = `desc`) => {
       ON reviews.review_id=comments.review_id  
       GROUP BY reviews.review_id 
       ORDER BY ${sort_by} ${order}`;
+
+      return db.query(queryString).then((res) => {
+        return res.rows;
+      });
     }
-    return db.query(queryString).then((response) => {
-      return response.rows;
-    });
   }
 };
 
