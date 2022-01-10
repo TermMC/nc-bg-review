@@ -460,6 +460,130 @@ describe("GET /api", () => {
               ],
             },
           },
+          "POST /api/reviews": {
+            description:
+              "creates a new review, accepts review object with the properties owner, title, review_body, designer and category, responds with the newly added review object",
+            "request body": {
+              owner: "dav3rid",
+              title: "Splendor",
+              review_body: "The only real way to meet the great Sheik Ullah",
+              designer: "A.N. Other",
+              category: "euro game",
+            },
+            "example response": {
+              review_id: 15,
+              owner: "dav3rid",
+              title: "Splendor",
+              review_body: "The only real way to meet the great Sheik Ullah",
+              designer: "A.N. Other",
+              category: "euro game",
+              votes: 0,
+              created_at: 1610964101251,
+              comment_count: 0,
+            },
+          },
+          "GET /api/reviews/:review_id": {
+            description: "serves a review object",
+            exampleResponse: {
+              review: {
+                review_id: 3,
+                title: "One Night Ultimate Werewolf",
+                designer: "Akihisa Okui",
+                owner: "happyamy2016",
+                review_img_url:
+                  "https://images.pexels.com/photos/5350049/pexels-photo-5350049.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
+                category: "hidden-roles",
+                created_at: 1610964101251,
+                votes: 5,
+                comment_count: 3,
+              },
+            },
+          },
+          "PATCH /api/reviews/:review_id": {
+            description:
+              "updates the review with keys from the request body, currently only accepts inc_votes, responds with the updated review",
+            "request body": { inc_votes: 1 },
+            "example response": {
+              review: {
+                title: "One Night Ultimate Werewolf",
+                designer: "Akihisa Okui",
+                owner: "happyamy2016",
+                review_img_url:
+                  "https://images.pexels.com/photos/5350049/pexels-photo-5350049.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
+                category: "hidden-roles",
+                created_at: 1610964101251,
+                votes: 6,
+              },
+            },
+          },
+          "GET /api/reviews/:review_id/comments": {
+            description: "serves an array of all comments on review",
+            exampleResponse: {
+              comments: [
+                {
+                  comment_id: 5,
+                  body: "My dog loved this game too!",
+                  votes: 13,
+                  author: "mallionaire",
+                  review_id: 3,
+                  created_at: 1610964545410,
+                },
+              ],
+            },
+          },
+          "POST /api/reviews/:review_id/comments": {
+            description:
+              "creates an new comment on the review, accepts comment object with valid username and body, responds with the created comment object",
+            "request body": {
+              username: "dav3rid",
+              body: "This game was mad to the max",
+            },
+            "example response": {
+              username: "dav3rid",
+              body: "This game was mad to the max",
+              comment_id: 10,
+            },
+          },
+          "DELETE /api/comments/:comment_id": {
+            description: "deletes the comment",
+            "example response":
+              "Status 204 - No body is returned by this endpoint",
+          },
+          "PATCH /api/comments/:comment_id": {
+            description:
+              "updates the comment with keys from the request body, currently only accepts inc_votes, responds with the updated comment",
+            "request body": { inc_votes: 1 },
+            "example response": {
+              comment_id: 5,
+              body: "My dog loved this game too!",
+              votes: 14,
+              author: "mallionaire",
+              review_id: 3,
+              created_at: 1610964545410,
+            },
+          },
+          "GET /api/users": {
+            description: "serves an array of all users",
+            "example response": {
+              users: [
+                {
+                  username: "dav3rid",
+                  name: "dave",
+                  avatar_url:
+                    "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+                },
+              ],
+            },
+          },
+          "GET /api/users/:username": {
+            description: "serves a user object",
+            "example response": {
+              username: "dav3rid",
+              name: "dave",
+              avatar_url:
+                "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+            },
+          },
         });
       });
   });
