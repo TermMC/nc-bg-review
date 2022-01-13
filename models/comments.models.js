@@ -8,7 +8,9 @@ exports.fetchComments = (review_id) => {
     `
     SELECT *
     FROM comments 
-    WHERE review_id = ${review_id}`
+    WHERE review_id = ${review_id}
+    ORDER BY created_at 
+    DESC`
   );
   return Promise.all([checkReviewExists, fetchTheComments]).then((response) => {
     if (response[0]) {
