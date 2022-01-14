@@ -163,7 +163,7 @@ describe("GET /api/reviews?query", () => {
       .expect(200)
       .then((response) => {
         expect(response.body.reviews).toBeInstanceOf(Array);
-        expect(response.body.reviews.length).toBe(13);
+        expect(response.body.reviews.length).toBe(10);
 
         response.body.reviews.forEach((review) => {
           return expect(review).toEqual(
