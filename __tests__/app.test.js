@@ -156,7 +156,7 @@ describe("PATCH /api/reviews/:review_id", () => {
   });
 });
 
-describe.only("GET /api/reviews?query", () => {
+describe("GET /api/reviews?query", () => {
   test("200 responds with an array of first 10 reviews when no query provided", () => {
     return request(app)
       .get("/api/reviews")
@@ -326,10 +326,31 @@ describe.only("GET /api/reviews?query", () => {
   });
 });
 
-describe("GET /api/reviews/:review_id/comments", () => {
+describe.only("GET /api/reviews/:review_id/comments?query", () => {
   test("200 returns array of comments for given review id", () => {
     return request(app)
       .get("/api/reviews/2/comments")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.comments).toBeInstanceOf(Array);
+        expect(response.body.comments.length).toBe(2);
+        response.body.comments.forEach((comment) => {
+          return expect(comment).toEqual(
+            expect.objectContaining({
+              comment_id: expect.any(Number),
+              body: expect.any(String),
+              votes: expect.any(Number),
+              author: expect.any(String),
+              review_id: 2,
+              created_at: expect.any(String),
+            })
+          );
+        });
+      });
+  });
+  test("200 returns array of comments with appropriate num_limit from query", () => {
+    return request(app)
+      .get("/api/reviews/2/comments?num_limit=3")
       .expect(200)
       .then((response) => {
         expect(response.body.comments).toBeInstanceOf(Array);
@@ -345,6 +366,47 @@ describe("GET /api/reviews/:review_id/comments", () => {
               created_at: expect.any(String),
             })
           );
+        });
+      });
+  });
+  test("200 returns array of comments with appropriate num_limit from query", () => {
+    return request(app)
+      .get("/api/reviews/2/comments?num_offset=2")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.comments).toBeInstanceOf(Array);
+        expect(response.body.comments.length).toBe(1);
+        response.body.comments.forEach((comment) => {
+          return expect(comment).toEqual(
+            expect.objectContaining({
+              comment_id: expect.any(Number),
+              body: expect.any(String),
+              votes: expect.any(Number),
+              author: expect.any(String),
+              review_id: 2,
+              created_at: expect.any(String),
+            })
+          );
+        });
+      });
+  });
+  test("200 returns array of comments with array sorted by votes", () => {
+    return request(app)
+      .get("/api/reviews/2/comments?sort_by=votes")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.comments).toBeSortedBy("votes", {
+          descending: true,
+        });
+      });
+  });
+  test("200 returns array of comments with array sorted in ASC order", () => {
+    return request(app)
+      .get("/api/reviews/2/comments?order=asc")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.comments).toBeSortedBy("created_at", {
+          descending: false,
         });
       });
   });

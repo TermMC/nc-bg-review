@@ -7,7 +7,8 @@ const {
 
 exports.getComments = (req, res, next) => {
   const review_id = req.originalUrl.split("/")[3];
-  fetchComments(review_id)
+  const { sort_by, order, num_limit, num_offset } = req.query;
+  fetchComments(review_id, sort_by, order, num_limit, num_offset)
     .then((comments) => {
       res.status(200).send({ comments });
     })

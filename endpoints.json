@@ -15,7 +15,7 @@
     }
   },
   "GET /api/reviews": {
-    "description": "serves an array of all reviews",
+    "description": "serves an array of 10 reviews (this is the default num_limit)",
     "queries": ["category", "sort_by", "order", "num_limit", "num_offset"],
     "exampleResponse": {
       "reviews": [
@@ -85,6 +85,7 @@
   },
   "GET /api/reviews/:review_id/comments": {
     "description": "serves an array of all comments on review",
+    "queries": ["sort_by", "order", "num_limit", "num_offset"],
     "exampleResponse": {
       "comments": [
         {

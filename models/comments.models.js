@@ -1,24 +1,43 @@
 const db = require("../db/connection");
 const { checkRecordExists } = require("./utils");
 
-exports.fetchComments = (review_id) => {
-  const checkReviewExists = checkRecordExists("review", review_id);
+exports.fetchComments = (
+  review_id,
+  sort_by = "created_at",
+  order = "DESC",
+  num_limit = 2,
+  num_offset = 0
+) => {
+  if (
+    !["created_at", "votes"].includes(sort_by) ||
+    !["asc", "desc"].includes(order.toLowerCase()) ||
+    Number(num_limit) === NaN ||
+    Number(num_offset) === NaN
+  ) {
+    return Promise.reject({ status: 400, msg: "Invalid Request" });
+  } else {
+    const checkReviewExists = checkRecordExists("review", review_id);
 
-  const fetchTheComments = db.query(
-    `
+    const fetchTheComments = db.query(
+      `
     SELECT *
     FROM comments 
     WHERE review_id = ${review_id}
-    ORDER BY created_at 
-    DESC`
-  );
-  return Promise.all([checkReviewExists, fetchTheComments]).then((response) => {
-    if (response[0]) {
-      return response[1].rows;
-    } else {
-      return Promise.reject({ status: 404, msg: "Review not found" });
-    }
-  });
+    ORDER BY ${sort_by} 
+    ${order}
+    LIMIT ${num_limit}
+    OFFSET ${num_offset}`
+    );
+    return Promise.all([checkReviewExists, fetchTheComments]).then(
+      (response) => {
+        if (response[0]) {
+          return response[1].rows;
+        } else {
+          return Promise.reject({ status: 404, msg: "Review not found" });
+        }
+      }
+    );
+  }
 };
 
 // exports.createComment = (review_id, body, author) => {
