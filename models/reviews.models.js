@@ -73,13 +73,8 @@ exports.fetchReviews = (
   num_limit = 10,
   num_offset = 0
 ) => {
-  //we want to introduce pagination here in the back end
-  //LIMIT num_limit OFFSET num_offset
-  //these are the commands we will be using
-  //I reckon they will take default values, as sort_by and order do
-  //and I will have to update the controller to take those queries as well
   let queryString;
-  //want to have 4 triggers for an if statement
+
   if (
     ![
       "owner",

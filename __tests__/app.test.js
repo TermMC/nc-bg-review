@@ -156,7 +156,7 @@ describe("PATCH /api/reviews/:review_id", () => {
   });
 });
 
-describe("GET /api/reviews?query", () => {
+describe.only("GET /api/reviews?query", () => {
   test("200 responds with an array of first 10 reviews when no query provided", () => {
     return request(app)
       .get("/api/reviews")
@@ -216,6 +216,58 @@ describe("GET /api/reviews?query", () => {
       .expect(200)
       .then((response) => {
         expect(response.body.reviews).toHaveLength(0);
+      });
+  });
+  test("200 responds with an appropriate length array of reviews when num_limit query provided", () => {
+    return request(app)
+      .get("/api/reviews?num_limit=5")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.reviews).toBeInstanceOf(Array);
+
+        expect(response.body.reviews.length).toBe(5);
+        response.body.reviews.forEach((review) => {
+          return expect(review).toEqual(
+            expect.objectContaining({
+              review_id: expect.any(Number),
+              title: expect.any(String),
+              review_body: expect.any(String),
+              designer: expect.any(String),
+              review_img_url: expect.any(String),
+              votes: expect.any(Number),
+              category: expect.any(String),
+              owner: expect.any(String),
+              created_at: expect.any(String),
+              comment_count: expect.any(String),
+            })
+          );
+        });
+      });
+  });
+  test("200 responds with an offset started array reviews when num_offset query provided", () => {
+    return request(app)
+      .get("/api/reviews?num_offset=10")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.reviews).toBeInstanceOf(Array);
+
+        expect(response.body.reviews.length).toBe(3);
+        response.body.reviews.forEach((review) => {
+          return expect(review).toEqual(
+            expect.objectContaining({
+              review_id: expect.any(Number),
+              title: expect.any(String),
+              review_body: expect.any(String),
+              designer: expect.any(String),
+              review_img_url: expect.any(String),
+              votes: expect.any(Number),
+              category: expect.any(String),
+              owner: expect.any(String),
+              created_at: expect.any(String),
+              comment_count: expect.any(String),
+            })
+          );
+        });
       });
   });
   test("404 responds with bad request message when non-existent category provided", () => {
